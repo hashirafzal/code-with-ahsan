@@ -1,13 +1,9 @@
 "use client";
 import React, { useRef, useEffect, useState } from "react";
-import { useTheme } from "next-themes";
 
 export default function InteractiveHero() {
   const containerRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
-  const { resolvedTheme } = useTheme();
-
-  const isDark = resolvedTheme === "dark";
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -32,7 +28,7 @@ export default function InteractiveHero() {
   return (
     <div
       ref={containerRef}
-      className={`relative w-full overflow-hidden rounded-xl border-2 flex items-center justify-center p-8 min-h-[400px] md:min-h-[500px] transition-colors duration-300 ${isDark ? "bg-gray-900 border-gray-800" : "bg-indigo-50 border-indigo-100"}`}
+      className="relative w-full overflow-hidden rounded-xl border-2 border-base-300 flex items-center justify-center p-8 min-h-[400px] md:min-h-[500px] transition-colors duration-300 bg-base-200"
     >
       {/* Dynamic Background SVG with Parallax */}
       <svg
@@ -43,7 +39,7 @@ export default function InteractiveHero() {
           <radialGradient id="glow" cx="50%" cy="50%" r="50%">
             <stop
               offset="0%"
-              stopColor={isDark ? "#4f46e5" : "#6366f1"}
+              stopColor="#8f27e0"
               stopOpacity="0.4"
             />
             <stop offset="100%" stopColor="transparent" stopOpacity="0" />
@@ -61,9 +57,9 @@ export default function InteractiveHero() {
 
         {/* Floating AI Nodes */}
         <g
-          stroke={isDark ? "#818cf8" : "#4f46e5"}
+          stroke="#8f27e0"
           strokeWidth="2"
-          fill={isDark ? "#1e1b4b" : "#e0e7ff"}
+          fill="var(--color-base-300)"
           className="transition-transform duration-200"
         >
           <circle
@@ -102,7 +98,7 @@ export default function InteractiveHero() {
 
         {/* Connecting Lines */}
         <g
-          stroke={isDark ? "#4338ca" : "#818cf8"}
+          stroke="#8f27e0"
           strokeWidth="1"
           strokeDasharray="4 4"
           opacity="0.5"
@@ -148,19 +144,19 @@ export default function InteractiveHero() {
 
       {/* Hero Content */}
       <div className="z-10 flex flex-col items-center text-center max-w-3xl space-y-6">
-        <div className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase bg-primary-50 text-primary-600 border border-primary-200 shadow-sm">
+        <div className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold tracking-wider uppercase badge badge-outline badge-primary shadow-sm">
           Hackathon & Innovation Sprint
         </div>
-        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary-400 drop-shadow-sm">
+        <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-primary drop-shadow-sm">
           CWA Prompt-a-thon 2026
         </h1>
-        <p className="text-xl md:text-2xl font-light text-gray-700 dark:text-gray-300">
+        <p className="text-xl md:text-2xl font-light text-base-content/70">
           Theme:{" "}
-          <span className="font-semibold text-primary-600 dark:text-primary-400">
+          <span className="font-semibold text-primary">
             Generative AI, Build with AI
           </span>
         </p>
-        <div className="flex flex-col sm:flex-row gap-4 items-center mt-4 text-gray-600 dark:text-gray-400 font-medium">
+        <div className="flex flex-col sm:flex-row gap-4 items-center mt-4 text-base-content/60 font-medium">
           <div className="flex items-center gap-2">
             <svg
               xmlns="http://www.w3.org/2000/svg"
