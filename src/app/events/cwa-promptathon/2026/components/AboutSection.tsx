@@ -16,11 +16,13 @@ const AboutSection = () => {
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }} // Trigger when 30% of element is in view
-          className="bg-base-200/70 backdrop-blur-md rounded-2xl p-6 sm:p-10 relative overflow-hidden shadow-lg border border-base-300/60"
+          className="group relative bg-base-200/40 backdrop-blur-xl rounded-2xl p-8 sm:p-12 text-center sm:text-left border border-primary/10 dark:border-white/10 shadow-2xl overflow-hidden"
         >
+          {/* Top Accent Line (to match FeaturesSection) */}
+          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-50" />
+
           {/* Corner decoration */}
-          <div className="absolute top-0 right-0 w-20 h-20 border-t border-r border-primary/20 rounded-tr-2xl" />
-          <div className="absolute bottom-0 left-0 w-20 h-20 border-b border-l border-primary/20 rounded-bl-2xl" />
+          <div className="absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 border-primary/20 rounded-br-lg group-hover:border-primary/60 transition-colors duration-500" />
 
           <motion.div variants={itemVariants} className="flex items-center gap-3 mb-6">
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">

@@ -8,18 +8,22 @@ import EventStructureSection from "./components/EventStructureSection";
 
 const CwaPromptathon2026Page = () => {
   return (
-    <main
-      className="min-h-screen relative"
-      style={{
-        background: `linear-gradient(to bottom, hsl(var(--b1)) 0%, hsl(var(--b1) / 0.8) 50%, hsl(var(--b1)) 100%)`,
-      }}
-    >
+    <div className="relative overflow-x-hidden bg-base-100 flex flex-col min-h-screen">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        footer.footer-center { 
+          position: relative !important; 
+          z-index: 10 !important; 
+          margin-top: 0 !important;
+          border-radius: 0 !important;
+        }
+      `}} />
       <AnimatedBackground />
       <HeroSection />
       <AboutSection />
       <FeaturesSection />
       <EventStructureSection />
-    </main>
+    </div>
   );
 };
 

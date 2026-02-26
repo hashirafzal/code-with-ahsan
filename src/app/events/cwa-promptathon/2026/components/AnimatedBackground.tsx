@@ -4,128 +4,145 @@ import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 
 // Particle component with framer-motion animations and hover effect
-const Particle = ({ delay, durationOffset, x, y, size }: { delay: number; durationOffset: number; x: string; y: string; size: number }) => (
+const Particle = ({ delay, durationOffset, x, y, size, color }: { delay: number; durationOffset: number; x: string; y: string; size: number; color: string }) => (
   <motion.div
-    className="absolute rounded-full bg-primary/20"
+    className={`absolute rounded-full ${color}`}
     style={{ left: x, top: y, width: size, height: size }}
     animate={{
-      y: [0, -40, 0],
-      opacity: [0.2, 0.6, 0.2],
-      scale: [1, 1.3, 1],
+      y: [0, -100, 0],
+      x: [0, 20, -20, 0],
+      opacity: [0.1, 0.4, 0.1],
+      scale: [1, 1.5, 1],
     }}
-    transition={{ duration: 4 + durationOffset, repeat: Infinity, delay, ease: "easeInOut" }}
-    whileHover={{ scale: 1.8, opacity: 0.8 }}
+    transition={{ duration: 6 + durationOffset, repeat: Infinity, delay, ease: "easeInOut" }}
+    whileHover={{ scale: 2.5, opacity: 0.8, filter: "blur(0px)" }}
   />
 );
 
 const AnimatedBackground = () => {
   const [particles, setParticles] = useState<
-    { id: number; x: string; y: string; delay: number; durationOffset: number; size: number }[]
+    { id: number; x: string; y: string; delay: number; durationOffset: number; size: number; color: string }[]
   >([]);
 
-  // eslint-disable-next-line react-hooks/set-state-in-effect
   useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    const particleCount = isMobile ? 15 : 40;
+    const colors = ["bg-primary/30", "bg-accent/30", "bg-neon-cyan/30", "bg-neon-purple/30"];
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setParticles(
-      Array.from({ length: 20 }, (_, i) => ({
+      Array.from({ length: particleCount }, (_, i) => ({
         id: i,
         x: `${Math.random() * 100}%`,
         y: `${Math.random() * 100}%`,
         delay: Math.random() * 5,
-        durationOffset: Math.random() * 3,
-        size: 2 + Math.random() * 4,
+        durationOffset: Math.random() * 5,
+        size: 1 + Math.random() * (isMobile ? 2 : 3),
+        color: colors[Math.floor(Math.random() * colors.length)],
       }))
     );
 
     const styleSheet = document.styleSheets[0];
-    const keyframes = `
-      @keyframes scan-line {
-        0% { transform: translateY(-100%); }
-        100% { transform: translateY(100vh); }
+    const rules = [
+      `@keyframes scan-line {
+        0% { transform: translateY(-100%); opacity: 0; }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% { transform: translateY(100vh); opacity: 0; }
+      }`,
+      `@keyframes grid-pulse {
+        0%, 100% { opacity: 0.05; }
+        50% { opacity: 0.15; }
+      }`
+    ];
+
+    rules.forEach(rule => {
+      const ruleName = rule.match(/@keyframes\s+([^\s{]+)/)?.[1];
+      if (ruleName && ![...styleSheet.cssRules].some(r => r.cssText.includes(`@keyframes ${ruleName}`))) {
+        styleSheet.insertRule(rule, styleSheet.cssRules.length);
       }
-    `;
-    if (![...styleSheet.cssRules].some(rule => rule.cssText.includes('@keyframes scan-line'))) {
-      styleSheet.insertRule(keyframes, styleSheet.cssRules.length);
-    }
-  }, []); // Empty dependency array means this runs once on mount
+    });
+  }, []);
 
   const gridBackgroundStyle = {
     backgroundImage: `
-      linear-gradient(hsl(var(--p) / 0.04) 1px, transparent 1px),
-      linear-gradient(90deg, hsl(var(--p) / 0.04) 1px, transparent 1px)
+      linear-gradient(hsl(var(--p) / 0.1) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--p) / 0.1) 1px, transparent 1px)
     `,
-    backgroundSize: '60px 60px',
+    backgroundSize: '80px 80px',
+    animation: "grid-pulse 10s ease-in-out infinite",
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 bg-base-100">
       {/* Grid overlay */}
       <div className="absolute inset-0" style={gridBackgroundStyle} />
 
-      {/* Scan line effect */}
-      <div className="absolute inset-0 overflow-hidden opacity-[0.03]">
-        <div className="w-full h-px bg-primary" style={{ animation: "scan-line 8s linear infinite" }} />
+      {/* Hexagon pattern overlay (Subtle) */}
+      <div className="absolute inset-0 opacity-[0.02] dark:opacity-[0.04] bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]" />
+
+      {/* Scan line effect - Restored Visibility */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="w-full h-[2px] bg-gradient-to-r from-transparent via-primary/40 to-transparent shadow-[0_0_15px_rgba(143,39,224,0.2)] opacity-20 dark:opacity-40" style={{ animation: "scan-line 12s linear infinite" }} />
       </div>
 
-      {/* Large gradient orbs */}
+      {/* Large gradient orbs with theme-aware opacities - Performance optimized for mobile */}
       <motion.div
-        animate={{ x: [0, 50, 0], y: [0, -30, 0] }}
-        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
-        className="absolute w-[600px] h-[600px] rounded-full blur-[150px] opacity-[0.07]"
-        style={{ background: "hsl(var(--p))", top: "-10%", left: "-15%" }}
+        animate={{ x: [-20, 20, -20], y: [-30, 30, -30], scale: [1, 1.1, 1] }}
+        transition={{ duration: 15, repeat: Infinity, ease: "easeInOut" }}
+        className="absolute w-[400px] h-[400px] sm:w-[800px] sm:h-[800px] rounded-full blur-[80px] sm:blur-[160px] opacity-[0.05] dark:opacity-[0.15]"
+        style={{ background: "radial-gradient(circle, #00F0FF 0%, transparent 70%)", top: "-20%", left: "-20%" }}
       />
       <motion.div
-        animate={{ x: [0, -40, 0], y: [0, 40, 0] }}
-        transition={{ duration: 25, repeat: Infinity, ease: "easeInOut", delay: 5 }}
-        className="absolute w-[500px] h-[500px] rounded-full blur-[130px] opacity-[0.06]"
-        style={{ background: "hsl(var(--a))", top: "40%", right: "-10%" }}
+        animate={{ x: [30, -30, 30], y: [40, -40, 40], scale: [1, 1.2, 1] }}
+        transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+        className="absolute w-[350px] h-[350px] sm:w-[700px] sm:h-[700px] rounded-full blur-[70px] sm:blur-[140px] opacity-[0.04] dark:opacity-[0.12]"
+        style={{ background: "radial-gradient(circle, #BC13FE 0%, transparent 70%)", top: "30%", right: "-15%" }}
       />
       <motion.div
-        animate={{ x: [0, 30, 0], y: [0, -25, 0] }}
-        transition={{ duration: 22, repeat: Infinity, ease: "easeInOut", delay: 10 }}
-        className="absolute w-[400px] h-[400px] rounded-full blur-[120px] opacity-[0.05]"
-        style={{ background: "hsl(var(--p))", bottom: "0%", left: "20%" }}
+        animate={{ x: [-10, 10, -10], y: [20, -20, 20], scale: [0.9, 1.1, 0.9] }}
+        transition={{ duration: 18, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+        className="absolute w-[300px] h-[300px] sm:w-[600px] sm:h-[600px] rounded-full blur-[60px] sm:blur-[120px] opacity-[0.03] dark:opacity-[0.1]"
+        style={{ background: "radial-gradient(circle, #8f27e0 0%, transparent 70%)", bottom: "-10%", left: "10%" }}
       />
 
       {/* Floating particles */}
       {particles.map((p) => (
-        <Particle key={p.id} delay={p.delay} durationOffset={p.durationOffset} x={p.x} y={p.y} size={p.size} />
+        <Particle key={p.id} delay={p.delay} durationOffset={p.durationOffset} x={p.x} y={p.y} size={p.size} color={p.color} />
       ))}
 
-      {/* Geometric shapes */}
+      {/* Geometric shapes with glowing borders */}
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-        className="absolute w-32 h-32 border border-primary/[0.06] rounded-xl"
-        style={{ top: "15%", right: "15%" }}
-      />
-      <motion.div
-        animate={{ rotate: -360 }}
+        animate={{ rotate: 360, scale: [1, 1.05, 1] }}
         transition={{ duration: 40, repeat: Infinity, ease: "linear" }}
-        className="absolute w-48 h-48 border border-accent/[0.05] rounded-full"
-        style={{ bottom: "20%", left: "8%" }}
+        className="absolute w-32 h-32 sm:w-64 sm:h-64 border border-primary/20 rounded-3xl shadow-[0_0_20px_rgba(143,39,224,0.1)]"
+        style={{ top: "10%", right: "5%", rotate: "15deg" }}
       />
       <motion.div
-        animate={{ rotate: 360 }}
-        transition={{ duration: 35, repeat: Infinity, ease: "linear" }}
-        className="absolute w-20 h-20 border border-primary/[0.08] rotate-45"
-        style={{ top: "60%", right: "25%" }}
+        animate={{ rotate: -360, scale: [1, 1.1, 1] }}
+        transition={{ duration: 50, repeat: Infinity, ease: "linear" }}
+        className="absolute w-48 h-48 sm:w-96 sm:h-96 border border-neon-cyan/10 rounded-full shadow-[0_0_25px_rgba(0,240,255,0.05)]"
+        style={{ bottom: "5%", left: "-5%" }}
       />
 
-      {/* Connecting lines (subtle) */}
-      <svg className="absolute inset-0 w-full h-full opacity-[0.03]">
-        <motion.line
-          x1="10%" y1="20%" x2="90%" y2="80%"
-          stroke="hsl(var(--p))" strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: [0, 1, 0] }}
-          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut" }}
+      {/* Connecting lines with path animation */}
+      <svg className="absolute inset-0 w-full h-full opacity-[0.05]">
+        <motion.path
+          d="M 100 200 Q 400 50 700 300 T 1200 100"
+          fill="none"
+          stroke="#00F0FF"
+          strokeWidth="1"
+          strokeDasharray="10 10"
+          animate={{ pathOffset: [0, 1] }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
-        <motion.line
-          x1="80%" y1="10%" x2="20%" y2="70%"
-          stroke="hsl(var(--a))" strokeWidth="1"
-          initial={{ pathLength: 0 }}
-          animate={{ pathLength: [0, 1, 0] }}
-          transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+        <motion.path
+          d="M 200 800 Q 600 900 900 600 S 1300 1000 1600 700"
+          fill="none"
+          stroke="#BC13FE"
+          strokeWidth="1"
+          strokeDasharray="15 15"
+          animate={{ pathOffset: [0, -1] }}
+          transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
         />
       </svg>
     </div>

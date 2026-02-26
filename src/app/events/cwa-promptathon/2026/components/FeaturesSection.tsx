@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, useMotionValue, useMotionTemplate } from "framer-motion";
 import { Users, GraduationCap, Rocket, type LucideIcon } from "lucide-react";
 
 const features: { icon: LucideIcon; title: string; description: string; color: string }[] = [
@@ -26,36 +26,58 @@ const features: { icon: LucideIcon; title: string; description: string; color: s
 
 const FeatureCard = ({ feature, index }: { feature: typeof features[0]; index: number }) => {
   const isPrimary = feature.color === "primary";
+  const mouseX = useMotionValue(0);
+  const mouseY = useMotionValue(0);
+
+  function handleMouseMove({ currentTarget, clientX, clientY }: React.MouseEvent) {
+    const { left, top } = currentTarget.getBoundingClientRect();
+    mouseX.set(clientX - left);
+    mouseY.set(clientY - top);
+  }
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 40 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.3 }}
-      transition={{ duration: 0.6, delay: index * 0.15, type: "spring" }} // Re-introduced animation with index delay
-      whileHover={{ y: -8 }} // Added hover effect
-      className="bg-base-200/70 backdrop-blur-md rounded-2xl p-6 sm:p-8 text-center relative overflow-hidden shadow-lg border border-base-300/60 transition-all duration-500 group hover:border-primary/40"
+      transition={{ duration: 0.8, delay: index * 0.15, ease: [0.22, 1, 0.36, 1] }}
+      onMouseMove={handleMouseMove}
+      className="group relative bg-base-200/40 backdrop-blur-xl rounded-2xl p-8 text-center border border-primary/10 dark:border-white/10 hover:border-primary/40 transition-colors duration-500 overflow-hidden shadow-2xl"
     >
-      {/* Top glow line - simplified without motion */}
-      <div
-        className={`absolute top-0 left-1/2 -translate-x-1/2 h-px ${isPrimary ? 'bg-primary' : 'bg-accent'}`}
-        style={{ width: "60%" }} // Static width
+      {/* Mouse Tracking Glow Effect */}
+      <motion.div
+        className="pointer-events-none absolute -inset-px rounded-2xl opacity-0 group-hover:opacity-100 transition duration-300"
+        style={{
+          background: useMotionTemplate`
+            radial-gradient(
+              350px circle at ${mouseX}px ${mouseY}px,
+              ${isPrimary ? 'rgba(143, 39, 224, 0.15)' : 'rgba(0, 240, 255, 0.15)'},
+              transparent 80%
+            )
+          `,
+        }}
       />
 
-      {/* Icon */}
-      <div className={`w-14 h-14 rounded-xl ${isPrimary ? 'bg-primary/10' : 'bg-accent/10'} flex items-center justify-center mx-auto mb-5`}>
-        <feature.icon className={`w-7 h-7 ${isPrimary ? 'text-primary' : 'text-accent'}`} />
+      {/* Top Accent Line */}
+      <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent ${isPrimary ? 'via-primary' : 'via-neon-cyan'} to-transparent opacity-50`} />
+
+      {/* Icon with Glowing Backdrop */}
+      <div className="relative mb-6 inline-block">
+        <div className={`absolute inset-0 blur-2xl opacity-20 ${isPrimary ? 'bg-primary' : 'bg-neon-cyan'}`} />
+        <div className={`relative w-16 h-16 rounded-2xl ${isPrimary ? 'bg-primary/10 border-primary/20' : 'bg-neon-cyan/10 border-neon-cyan/20'} border flex items-center justify-center mx-auto transition-transform duration-500 group-hover:scale-110 group-hover:rotate-3`}>
+          <feature.icon className={`w-8 h-8 ${isPrimary ? 'text-primary' : 'text-neon-cyan'}`} />
+        </div>
       </div>
 
-      <h3 className="text-lg sm:text-xl font-semibold font-mono text-base-content mb-3">
+      <h3 className="text-xl font-black font-mono text-base-content mb-4 tracking-tight">
         {feature.title}
       </h3>
-      <p className="text-base-content/70 text-sm leading-relaxed">
+      <p className="text-base-content/60 text-sm leading-relaxed font-light">
         {feature.description}
       </p>
 
-      {/* Bottom corner decoration */}
-      <div className={`absolute bottom-0 right-0 w-12 h-12 ${isPrimary ? 'border-primary/10' : 'border-accent/10'} border-b border-r rounded-br-2xl opacity-0 group-hover:opacity-100 transition-opacity`} />
+      {/* Dynamic corner decoration */}
+      <div className={`absolute bottom-2 right-2 w-8 h-8 border-b-2 border-r-2 ${isPrimary ? 'border-primary/20' : 'border-neon-cyan/20'} rounded-br-lg group-hover:border-primary/60 transition-colors duration-500`} />
     </motion.div>
   );
 };
